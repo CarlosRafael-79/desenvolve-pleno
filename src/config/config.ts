@@ -1,7 +1,7 @@
-import { setupMockAdapter } from './mockAdapter';
+import { setupMockAdapter } from '../lib/mockAdapter';
 
 // Configuração do ambiente
-export const config = {
+export const appConfig = {
   // URL base da API
   API_BASE_URL: 'https://abitus-api.geia.vip/v1',
   
@@ -31,9 +31,9 @@ export const config = {
 // Inicializa a configuração do mock
 export const initializeMock = () => {
   console.log('🔧 Inicializando configuração do mock...');
-  console.log('🔧 Mock ENABLED:', config.MOCK.ENABLED);
+  console.log('🔧 Mock ENABLED:', appConfig.MOCK.ENABLED);
   
-  if (config.MOCK.ENABLED) {
+  if (appConfig.MOCK.ENABLED) {
     console.log('🎭 Inicializando Mock Adapter...');
     setupMockAdapter();
     console.log('✅ Mock Adapter inicializado com sucesso');
@@ -45,6 +45,6 @@ export const initializeMock = () => {
 
 // Função para verificar se o mock está ativo
 export const isMockActive = () => {
-  console.log('🔍 isMockActive called, returning:', config.MOCK.ENABLED);
-  return config.MOCK.ENABLED;
+  console.log('🔍 isMockActive called, returning:', appConfig.MOCK.ENABLED);
+  return appConfig.MOCK.ENABLED;
 };

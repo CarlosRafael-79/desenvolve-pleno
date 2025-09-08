@@ -15,7 +15,7 @@ export default function CarrosselAcoes() {
       backgroundColor: "bg-gradient-to-br from-blue-500 to-blue-700",
       buttonText: "Saiba Como Ajudar",
       buttonLink: "/como-ajudar",
-      buttonColor: "bg-white text-blue-600 hover:bg-blue-50"
+      buttonColor: "bg-gray-800 text-blue-400 hover:bg-gray-700"
     },
     {
       id: 2,
@@ -25,7 +25,7 @@ export default function CarrosselAcoes() {
       backgroundColor: "bg-gradient-to-br from-red-500 to-red-700",
       buttonText: "Acessar Site",
       buttonLink: "https://www.pjc.mt.gov.br",
-      buttonColor: "bg-white text-red-600 hover:bg-red-50"
+      buttonColor: "bg-gray-800 text-red-400 hover:bg-gray-700"
     },
     {
       id: 3,
@@ -35,7 +35,7 @@ export default function CarrosselAcoes() {
       backgroundColor: "bg-gradient-to-br from-green-500 to-green-700",
       buttonText: "Compartilhar",
       buttonLink: "#",
-      buttonColor: "bg-white text-green-600 hover:bg-green-50"
+      buttonColor: "bg-gray-800 text-green-400 hover:bg-gray-700"
     }
   ];
 
@@ -63,7 +63,7 @@ export default function CarrosselAcoes() {
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className="relative bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="relative bg-gray-800 rounded-2xl shadow-lg border border-gray-700 overflow-hidden">
       {/* Slide Content */}
       <div className={`relative h-80 flex items-center justify-center ${currentSlideData.backgroundColor}`}>
         {/* Content */}
@@ -110,7 +110,7 @@ export default function CarrosselAcoes() {
         {/* Navigation Arrows */}
         <button
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3 transition-all duration-200 z-20"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800/20 hover:bg-gray-800/30 text-white rounded-full p-3 transition-all duration-200 z-20"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -119,7 +119,7 @@ export default function CarrosselAcoes() {
 
         <button
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3 transition-all duration-200 z-20"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800/20 hover:bg-gray-800/30 text-white rounded-full p-3 transition-all duration-200 z-20"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -135,8 +135,8 @@ export default function CarrosselAcoes() {
             onClick={() => goToSlide(index)}
             className={`w-3 h-3 rounded-full transition-all duration-200 ${
               index === currentSlide 
-                ? 'bg-white' 
-                : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-gray-800' 
+                : 'bg-gray-800/50 hover:bg-gray-800/75'
             }`}
           />
         ))}

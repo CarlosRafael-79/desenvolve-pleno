@@ -9,7 +9,7 @@ export interface UltimaOcorrencia {
   encontradoVivo: boolean;
   localDesaparecimentoConcat: string;
   ocorrenciaEntrevDesapDTO: OcorrenciaEntrevDesapDTO;
-  listaCartaz: any | null;
+  listaCartaz: unknown | null;
   ocoId: number;
 }
 

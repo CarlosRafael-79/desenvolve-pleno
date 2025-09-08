@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { initializeMock } from '../lib/config';
+import { initializeMock } from '../config/config';
 
 export default function MockInitializer() {
   useEffect(() => {

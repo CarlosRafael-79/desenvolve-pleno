@@ -4,10 +4,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { PessoaDesaparecida, InformacoesDesaparecidoResponse } from '../../../types/api';
 import { DesaparecidosService } from '../../../services/desaparecidosService';
-import Header from '../../../components/Header';
-import Footer from '../../../components/Footer';
 import InfoFormModal from '../../../components/InfoFormModal';
 import Toast from '../../../components/Toast';
+import LoadingSpinner from '../../../components/LoadingSpinner';
+import DetailPageLoader from '../../../components/DetailPageLoader';
 
 export default function PessoaDetailPage() {
   const params = useParams();
@@ -120,6 +120,8 @@ export default function PessoaDetailPage() {
         pessoa.ultimaOcorrencia.ocoId,
         formData.informacao,
         formData.data,
+        '', // localizacao - não implementado no modal ainda
+        '', // telefone - não implementado no modal ainda
         formData.anexos
       );
 
@@ -160,71 +162,50 @@ export default function PessoaDetailPage() {
 
   const getStatusColor = (dataLocalizacao: string | null) => {
     return isLocalizado(dataLocalizacao)
-      ? 'bg-green-100 text-green-800 border-green-200' 
-      : 'bg-red-100 text-red-800 border-red-200';
+      ? 'bg-green-600 text-green-100 border-green-500' 
+      : 'bg-red-600 text-red-100 border-red-500';
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Header />
-        <main className="flex-1 py-12">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-16">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Carregando dados da pessoa...</h3>
-              <p className="text-gray-600">Buscando informações detalhadas</p>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
+    return <DetailPageLoader />;
   }
 
   if (error || !pessoa) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Header />
-        <main className="flex-1 py-12">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center py-16">
-              <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                Erro ao carregar dados
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                {error || 'Pessoa não encontrada'}
-              </p>
-              <button
-                onClick={() => router.back()}
-                className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium"
-              >
-                Voltar
-              </button>
+      <div className="bg-gray-900 py-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
             </div>
+            <h3 className="text-2xl font-bold text-white mb-3">
+              Erro ao carregar dados
+            </h3>
+            <p className="text-gray-300 mb-6 max-w-md mx-auto">
+              {error || 'Pessoa não encontrada'}
+            </p>
+            <button
+              onClick={() => router.back()}
+              className="bg-purple-800 text-white px-6 py-3 rounded-xl hover:bg-purple-900 transition-colors font-medium"
+            >
+              Voltar
+            </button>
           </div>
-        </main>
-        <Footer />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header />
-      
-      <main className="flex-1 py-12">
+    <div className="bg-gray-900 py-12 page-transition">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Botão Voltar */}
           <div className="mb-8">
             <button
               onClick={() => router.back()}
-              className="flex items-center text-blue-600 hover:text-blue-800 transition-colors font-medium"
+              className="flex items-center text-purple-400 hover:text-purple-300 transition-colors font-medium"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -234,17 +215,34 @@ export default function PessoaDetailPage() {
           </div>
 
           {/* Card Principal */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+          <div className="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 overflow-hidden mb-8">
             {/* Foto Destacada */}
             <div className="relative">
-              <div className="h-96 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+              <div className="h-96 bg-gradient-to-br from-gray-700 to-gray-800 relative overflow-hidden">
                 {pessoa.urlFoto ? (
                   <>
                     <img
                       src={pessoa.urlFoto}
                       alt={pessoa.nome}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
                     />
+                    
+                    {/* Fallback para quando a imagem falha ao carregar */}
+                    <div className="w-full h-full flex items-center justify-center hidden">
+                      <div className="text-center">
+                        <div className="w-32 h-32 bg-gray-300 rounded-full mx-auto mb-4 flex items-center justify-center">
+                          <svg className="w-16 h-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-500 font-medium">Foto não disponível</p>
+                      </div>
+                    </div>
                     
                     {/* Botão de Expandir */}
                     <button
@@ -254,7 +252,7 @@ export default function PessoaDetailPage() {
                         console.log('Botão expandir clicado, abrindo modal');
                         setShowImageModal(true);
                       }}
-                      className="absolute top-4 right-4 bg-white/95 hover:bg-white text-gray-800 hover:text-gray-900 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm z-20 cursor-pointer"
+                      className="absolute top-4 right-4 bg-gray-800/95 hover:bg-gray-700 text-gray-300 hover:text-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200 backdrop-blur-sm z-20 cursor-pointer"
                       title="Expandir imagem"
                       type="button"
                     >
@@ -285,7 +283,7 @@ export default function PessoaDetailPage() {
                         <p className="text-white/90 text-lg">Pessoa desaparecida</p>
                       </div>
                       <div>
-                        <span className={`px-4 py-2 text-sm font-semibold rounded-full border ${getStatusColor(pessoa.ultimaOcorrencia.dataLocalizacao)} bg-white/90 backdrop-blur-sm`}>
+                        <span className={`px-4 py-2 text-sm font-semibold rounded-full border ${getStatusColor(pessoa.ultimaOcorrencia.dataLocalizacao)}`}>
                           {isLocalizado(pessoa.ultimaOcorrencia.dataLocalizacao) ? 'Localizado' : 'Desaparecido'}
                         </span>
                       </div>
@@ -299,42 +297,42 @@ export default function PessoaDetailPage() {
             <div className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Sexo</h3>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-white">
                       {pessoa.sexo === 'MASCULINO' ? 'Masculino' : 'Feminino'}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Status Vivo</h3>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-white">
                       {pessoa.vivo ? 'Sim' : 'Não'}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-yellow-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Idade</h3>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-white">
                       {pessoa.idade || 'Não informada'}
                     </p>
                   </div>
@@ -348,22 +346,22 @@ export default function PessoaDetailPage() {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Data do Desaparecimento</h3>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-white">
                       {formatDate(pessoa.ultimaOcorrencia.dtDesaparecimento)}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500 mb-1">Local do Desaparecimento</h3>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="text-lg font-semibold text-white">
                       {pessoa.ultimaOcorrencia.localDesaparecimentoConcat}
                     </p>
                   </div>
@@ -376,12 +374,12 @@ export default function PessoaDetailPage() {
               (pessoa.ultimaOcorrencia.ocorrenciaEntrevDesapDTO?.informacao) || 
               (pessoa.vivo && pessoa.ultimaOcorrencia.dataLocalizacao)) && (
               <div className="border-t border-gray-200 p-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Informações Adicionais</h2>
+                <h2 className="text-xl font-semibold text-white mb-6">Informações Adicionais</h2>
                 
                 <div className="space-y-6">
                   {/* Vestimentas */}
                   {pessoa.ultimaOcorrencia.ocorrenciaEntrevDesapDTO?.vestimentasDesaparecido && (
-                    <div className="bg-gray-50 rounded-xl p-6">
+                    <div className="bg-gray-800 rounded-xl p-6">
                       <div className="flex items-start space-x-3">
                         <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
                           <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -390,7 +388,7 @@ export default function PessoaDetailPage() {
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-gray-500 mb-2">Vestimentas</h3>
-                          <p className="text-gray-900">
+                          <p className="text-white">
                             {pessoa.ultimaOcorrencia.ocorrenciaEntrevDesapDTO.vestimentasDesaparecido}
                           </p>
                         </div>
@@ -400,16 +398,16 @@ export default function PessoaDetailPage() {
 
                   {/* Informações */}
                   {pessoa.ultimaOcorrencia.ocorrenciaEntrevDesapDTO?.informacao && (
-                    <div className="bg-gray-50 rounded-xl p-6">
+                    <div className="bg-gray-800 rounded-xl p-6">
                       <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-gray-500 mb-2">Informações</h3>
-                          <p className="text-gray-900">
+                          <p className="text-white">
                             {pessoa.ultimaOcorrencia.ocorrenciaEntrevDesapDTO.informacao}
                           </p>
                         </div>
@@ -419,16 +417,16 @@ export default function PessoaDetailPage() {
 
                   {/* Data de Localização (se encontrado) */}
                   {isLocalizado(pessoa.ultimaOcorrencia.dataLocalizacao) && (
-                    <div className="bg-green-50 rounded-xl p-6">
+                    <div className="bg-gray-800 rounded-xl p-6">
                       <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-gray-500 mb-2">Data da Localização</h3>
-                          <p className="text-lg font-semibold text-green-800">
+                          <p className="text-lg font-semibold text-white">
                             {pessoa.ultimaOcorrencia.dataLocalizacao ? formatDate(pessoa.ultimaOcorrencia.dataLocalizacao) : 'N/A'}
                           </p>
                         </div>
@@ -444,16 +442,16 @@ export default function PessoaDetailPage() {
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-bold text-white">
                       Informações dos Cidadãos
                     </h2>
-                    <p className="text-gray-600 mt-1">
+                    <p className="text-gray-300 mt-1">
                       Relatos e informações compartilhadas pela comunidade
                     </p>
                   </div>
                   <button
                     onClick={() => setShowFormModal(true)}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="bg-purple-800 text-white px-6 py-3 rounded-xl hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 flex items-center font-semibold transition-all duration-200 shadow-sm hover:shadow-md"
                   >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -463,32 +461,32 @@ export default function PessoaDetailPage() {
                 </div>
                 
                 {/* Call to Action */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <div className="bg-gray-800 border border-purple-700 rounded-xl p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                      <h3 className="text-lg font-semibold text-white mb-2">
                         Você tem informações sobre esta pessoa?
                       </h3>
-                      <p className="text-blue-800 mb-4">
+                      <p className="text-gray-300 mb-4">
                         Se você viu esta pessoa ou tem alguma informação que pode ajudar, compartilhe conosco. 
                         Sua informação pode ser crucial para reunir uma família.
                       </p>
                       <div className="flex flex-wrap gap-3">
-                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <span className="bg-purple-600 text-purple-100 px-3 py-1 rounded-full text-sm font-medium">
                           ✓ Local onde foi vista
                         </span>
-                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <span className="bg-purple-600 text-purple-100 px-3 py-1 rounded-full text-sm font-medium">
                           ✓ Data e horário
                         </span>
-                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <span className="bg-purple-600 text-purple-100 px-3 py-1 rounded-full text-sm font-medium">
                           ✓ Vestimentas
                         </span>
-                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        <span className="bg-purple-600 text-purple-100 px-3 py-1 rounded-full text-sm font-medium">
                           ✓ Fotos ou vídeos
                         </span>
                       </div>
@@ -498,25 +496,24 @@ export default function PessoaDetailPage() {
               </div>
               
               {loadingInformacoes ? (
-                <div className="text-center py-12">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Carregando informações...</h3>
-                  <p className="text-gray-600">Buscando relatos da comunidade</p>
-                </div>
+                <LoadingSpinner 
+                  message="Carregando informações..." 
+                  size="md"
+                />
               ) : informacoes.length > 0 ? (
                 <>
                   <div className="space-y-6 mb-8">
                     {informacoes.map((info, index) => (
-                      <div key={info.id} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div key={info.id} className="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-10 h-10 bg-cyan-600 rounded-lg flex items-center justify-center">
+                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900">
+                              <h3 className="font-semibold text-white">
                                 Relato #{index + 1}
                               </h3>
                               <p className="text-sm text-gray-500">
@@ -524,13 +521,13 @@ export default function PessoaDetailPage() {
                               </p>
                             </div>
                           </div>
-                          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">
+                          <span className="bg-green-600 text-green-100 px-3 py-1 rounded-full text-xs font-medium">
                             Nova informação
                           </span>
                         </div>
                         
-                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                          <p className="text-gray-800 leading-relaxed">
+                        <div className="bg-gray-800 rounded-lg p-4 mb-4">
+                          <p className="text-gray-200 leading-relaxed">
                             {info.informacao}
                           </p>
                         </div>
@@ -550,12 +547,12 @@ export default function PessoaDetailPage() {
                                   href={anexo}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                                  className="flex items-center space-x-3 p-3 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors"
                                 >
-                                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                   </svg>
-                                  <span className="text-blue-800 font-medium text-sm">
+                                  <span className="text-gray-300 font-medium text-sm">
                                     Anexo {anexoIndex + 1}
                                   </span>
                                 </a>
@@ -573,7 +570,7 @@ export default function PessoaDetailPage() {
                       <button
                         onClick={() => carregarInformacoes(currentPage - 1)}
                         disabled={currentPage === 1 || loadingInformacoes}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Anterior
                       </button>
@@ -585,7 +582,7 @@ export default function PessoaDetailPage() {
                       <button
                         onClick={() => carregarInformacoes(currentPage + 1)}
                         disabled={currentPage === totalPages || loadingInformacoes}
-                        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Próximo
                       </button>
@@ -594,21 +591,21 @@ export default function PessoaDetailPage() {
                 </>
               ) : (
                 <div className="text-center py-16">
-                  <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-24 h-24 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  <h3 className="text-2xl font-bold text-white mb-3">
                     Nenhuma informação disponível
                   </h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  <p className="text-gray-300 mb-6 max-w-md mx-auto">
                     Ainda não há informações fornecidas por cidadãos sobre esta pessoa. 
                     Seja o primeiro a compartilhar informações que possam ajudar.
                   </p>
                   <button
                     onClick={() => setShowFormModal(true)}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-medium"
+                    className="bg-purple-800 text-white px-6 py-3 rounded-xl hover:bg-purple-900 transition-colors font-medium"
                   >
                     Enviar Primeira Informação
                   </button>
@@ -617,9 +614,6 @@ export default function PessoaDetailPage() {
             </div>
           </div>
         </div>
-      </main>
-
-      <Footer />
 
       {/* Modal do Formulário */}
       <InfoFormModal
@@ -677,7 +671,26 @@ export default function PessoaDetailPage() {
                 maxWidth: '90vw', 
                 maxHeight: '90vh'
               }}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                // Mostrar fallback no modal
+                const fallback = target.nextElementSibling as HTMLElement;
+                if (fallback) {
+                  fallback.classList.remove('hidden');
+                }
+              }}
             />
+            
+            {/* Fallback para modal quando imagem falha */}
+            <div className="hidden flex flex-col items-center justify-center text-white">
+              <div className="w-32 h-32 bg-gray-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <svg className="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <p className="text-gray-300 font-medium text-lg">Foto não disponível</p>
+            </div>
           </div>
         </div>
       )}

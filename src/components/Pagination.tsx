@@ -1,18 +1,24 @@
 'use client';
 
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { atualizarPagina } from '../store/slices/filtrosSlice';
+import { buscarPessoasDesaparecidas } from '../store/slices/desaparecidosSlice';
+
 interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
   loading?: boolean;
 }
 
 export default function Pagination({ 
-  currentPage, 
-  totalPages, 
-  onPageChange, 
   loading = false 
 }: PaginationProps) {
+  const dispatch = useAppDispatch();
+  const { currentPage, totalPages } = useAppSelector((state) => state.desaparecidos);
+  const filtros = useAppSelector((state) => state.filtros);
+
+  const handlePageChange = (page: number) => {
+    dispatch(atualizarPagina(page));
+    dispatch(buscarPessoasDesaparecidas({ ...filtros, pagina: page }));
+  };
   if (totalPages <= 1) return null;
 
   const getVisiblePages = () => {
@@ -48,10 +54,10 @@ export default function Pagination({
   const visiblePages = getVisiblePages();
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-gray-800 rounded-lg shadow-lg p-6">
       <div className="flex flex-col sm:flex-row items-center justify-between">
         {/* Informações da página */}
-        <div className="text-sm text-gray-600 mb-4 sm:mb-0">
+        <div className="text-sm text-gray-300 mb-4 sm:mb-0">
           <span className="font-medium">
             Página {currentPage + 1} de {totalPages}
           </span>
@@ -61,9 +67,9 @@ export default function Pagination({
         <div className="flex items-center space-x-2">
           {/* Botão Anterior */}
           <button
-            onClick={() => onPageChange(currentPage - 1)}
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 0 || loading}
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             ← Anterior
           </button>
@@ -85,12 +91,12 @@ export default function Pagination({
               return (
                 <button
                   key={index}
-                  onClick={() => onPageChange(pageNumber - 1)}
+                  onClick={() => handlePageChange(pageNumber - 1)}
                   disabled={loading}
                   className={`px-3 py-2 text-sm font-medium rounded-md ${
                     isCurrentPage
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                      ? 'bg-purple-800 text-white'
+                      : 'text-gray-300 bg-gray-700 border border-gray-600 hover:bg-gray-600'
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {pageNumber}
@@ -101,9 +107,9 @@ export default function Pagination({
 
           {/* Botão Próximo */}
           <button
-            onClick={() => onPageChange(currentPage + 1)}
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages - 1 || loading}
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Próximo →
           </button>
@@ -114,7 +120,7 @@ export default function Pagination({
       {loading && (
         <div className="mt-4 text-center">
           <div className="inline-flex items-center text-sm text-gray-600">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2"></div>
             Carregando...
           </div>
         </div>

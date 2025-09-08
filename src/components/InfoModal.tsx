@@ -50,20 +50,20 @@ export default function InfoModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-white">
               Informações sobre {nomePessoa}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-300 mt-1">
               Ocorrência ID: {ocorrenciaId}
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
+            className="text-gray-400 hover:text-white text-2xl"
           >
             ×
           </button>
@@ -74,7 +74,7 @@ export default function InfoModal({
           {loading && (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-gray-600">Carregando informações...</p>
+              <p className="mt-2 text-gray-300">Carregando informações...</p>
             </div>
           )}
 
@@ -96,7 +96,7 @@ export default function InfoModal({
             <>
               <div className="mb-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-white">
                     Informações ({totalInformacoes})
                   </h3>
                 </div>
@@ -105,7 +105,7 @@ export default function InfoModal({
               {totalInformacoes === 0 ? (
                 <div className="text-center py-8">
                   <div className="text-gray-400 text-6xl mb-4">📋</div>
-                  <p className="text-gray-600">Nenhuma informação encontrada para esta ocorrência.</p>
+                  <p className="text-gray-300">Nenhuma informação encontrada para esta ocorrência.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -133,7 +133,7 @@ function InfoCard({ informacao }: InfoCardProps) {
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-2">
         <div className="flex-1">
-          <p className="text-gray-900 text-sm leading-relaxed">
+          <p className="text-white text-sm leading-relaxed">
             {informacao.informacao}
           </p>
         </div>

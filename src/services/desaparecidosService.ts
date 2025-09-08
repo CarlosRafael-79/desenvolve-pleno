@@ -67,7 +67,7 @@ export class DesaparecidosService {
       });
       console.log(`✅ Pessoa encontrada:`, response);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`❌ Erro ao buscar pessoa com ID ${id}:`, error);
       throw new Error('Falha ao carregar dados da pessoa');
     }
@@ -106,7 +106,7 @@ export class DesaparecidosService {
     try {
       console.log(`📋 Buscando informações da ocorrência ${ocorrenciaId}, página ${page}...`);
 
-      const response = await apiRequest<any>({
+      const response = await apiRequest<unknown>({
         method: 'GET',
         url: `/ocorrencias/informacoes-desaparecido?ocorrenciaId=${ocorrenciaId}&page=${page}`,
       });
@@ -114,8 +114,8 @@ export class DesaparecidosService {
       console.log(`🔍 Resposta completa da API:`, response);
       console.log(`🔍 Tipo da resposta:`, typeof response);
       console.log(`🔍 É array?`, Array.isArray(response));
-      console.log(`🔍 Tem content?`, response?.content);
-      console.log(`🔍 Content é array?`, Array.isArray(response?.content));
+      console.log(`🔍 Tem content?`, (response as { content?: unknown })?.content);
+      console.log(`🔍 Content é array?`, Array.isArray((response as { content?: unknown })?.content));
 
       // Verificar se a resposta existe
       if (!response) {
@@ -139,17 +139,17 @@ export class DesaparecidosService {
         totalElements = response.length;
         totalPages = Math.ceil(totalElements / 10) || 1;
         console.log(`📊 Resposta é array direto com ${totalElements} itens`);
-      } else if (response.value && Array.isArray(response.value)) {
+      } else if ((response as { value?: unknown[] }).value && Array.isArray((response as { value?: unknown[] }).value)) {
         // Se a resposta tem estrutura com 'value' (estrutura da API real)
-        content = response.value;
-        totalElements = response.Count || response.value.length;
+        content = (response as { value: unknown[] }).value as InformacoesDesaparecidoResponse;
+        totalElements = (response as { Count?: number }).Count || (response as { value: unknown[] }).value.length;
         totalPages = Math.ceil(totalElements / 10) || 1;
         console.log(`📊 Resposta tem estrutura 'value' com ${totalElements} itens`);
-      } else if (response.content && Array.isArray(response.content)) {
+      } else if ((response as { content?: unknown[] }).content && Array.isArray((response as { content?: unknown[] }).content)) {
         // Se a resposta tem estrutura paginada
-        content = response.content;
-        totalElements = response.totalElements || response.content.length;
-        totalPages = response.totalPages || Math.ceil(totalElements / 10) || 1;
+        content = (response as { content: unknown[] }).content as InformacoesDesaparecidoResponse;
+        totalElements = (response as { totalElements?: number }).totalElements || (response as { content: unknown[] }).content.length;
+        totalPages = (response as { totalPages?: number }).totalPages || Math.ceil(totalElements / 10) || 1;
         console.log(`📊 Resposta é paginada com ${totalElements} itens`);
       } else {
         // Se não conseguimos identificar a estrutura
@@ -189,27 +189,68 @@ export class DesaparecidosService {
     ocorrenciaId: number,
     informacao: string,
     data: string,
+    localizacao: string = '',
+    telefone: string = '',
     anexos: File[] = []
-  ): Promise<{ success: boolean; message: string; data?: any }> {
+  ): Promise<{ success: boolean; message: string; data?: unknown }> {
     try {
       console.log(`📤 Enviando informação para ocorrência ${ocorrenciaId}...`);
 
-      // Criar FormData para suportar arquivos
-      const formData = new FormData();
+      // Concatenar todas as informações no campo informacao
+      let informacaoCompleta = informacao;
       
-      // Adicionar arquivos se houver
-      anexos.forEach((file, index) => {
-        formData.append('files', file);
-      });
+      if (localizacao && localizacao.trim()) {
+        informacaoCompleta += `\n\n📍 Localização: ${localizacao}`;
+      }
+      
+      if (telefone && telefone.trim()) {
+        informacaoCompleta += `\n\n📞 Telefone para contato: ${telefone}`;
+      }
+
+      console.log('📝 Informação completa:', informacaoCompleta);
+      console.log('📅 Data:', data);
+      console.log('🆔 Ocorrência ID:', ocorrenciaId);
+      console.log('📎 Anexos:', anexos.length);
+
+      // Construir a URL com parâmetros de query
+      const params = new URLSearchParams();
+      params.append('informacao', informacaoCompleta);
+      params.append('data', data);
+      params.append('ocoId', ocorrenciaId.toString());
+      
+      // Adicionar descricao se houver (baseado no exemplo curl)
+      if (informacaoCompleta) {
+        params.append('descricao', informacaoCompleta);
+      }
+
+      const url = `/ocorrencias/informacoes-desaparecido?${params.toString()}`;
+
+      const requestConfig = {
+        method: 'POST' as const,
+        url,
+        data: undefined as FormData | undefined,
+      };
+
+      // Se há anexos, usar FormData
+      if (anexos.length > 0) {
+        const formData = new FormData();
+        
+        // Adicionar arquivos
+        anexos.forEach((file, index) => {
+          formData.append('files', file);
+          console.log(`📎 Arquivo ${index + 1}:`, file.name, file.size);
+        });
+
+        requestConfig.data = formData;
+      } else {
+        // Se não há anexos, enviar FormData vazio (como no exemplo curl)
+        const formData = new FormData();
+        formData.append('files', '');
+        requestConfig.data = formData;
+      }
 
       // Fazer a requisição POST
-      const response = await apiRequest<any>({
-        method: 'POST',
-        url: `/ocorrencias/informacoes-desaparecido?informacao=${encodeURIComponent(informacao)}&data=${data}&ocoId=${ocorrenciaId}`,
-        data: formData,
-        // Não definir Content-Type manualmente para multipart/form-data
-        // O axios define automaticamente com o boundary correto
-      });
+      const response = await apiRequest<unknown>(requestConfig);
 
       console.log(`✅ Informação enviada com sucesso para ocorrência ${ocorrenciaId}`);
       return {
@@ -218,18 +259,20 @@ export class DesaparecidosService {
         data: response
       };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`❌ Erro ao enviar informação para ocorrência ${ocorrenciaId}:`, error);
+      console.error(`❌ Detalhes do erro:`, (error as { response?: { data?: unknown } }).response?.data);
+      console.error(`❌ Status do erro:`, (error as { response?: { status?: number } }).response?.status);
       
       let errorMessage = 'Erro ao enviar informação. Tente novamente.';
       
-      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      if ((error as { code?: string }).code === 'ECONNABORTED' || (error as { message?: string }).message?.includes('timeout')) {
         errorMessage = 'Timeout: O upload está demorando muito. Tente com arquivos menores ou verifique sua conexão.';
-      } else if (error.response?.status === 413) {
+      } else if ((error as { response?: { status?: number } }).response?.status === 413) {
         errorMessage = 'Arquivo muito grande. Tente com arquivos menores que 10MB.';
-      } else if (error.response?.status >= 500) {
+      } else if ((error as { response?: { status?: number } }).response?.status && (error as { response?: { status?: number } }).response!.status! >= 500) {
         errorMessage = 'Erro no servidor. Tente novamente em alguns minutos.';
-      } else if (error.response?.status === 400) {
+      } else if ((error as { response?: { status?: number } }).response?.status === 400) {
         errorMessage = 'Dados inválidos. Verifique as informações e tente novamente.';
       }
       

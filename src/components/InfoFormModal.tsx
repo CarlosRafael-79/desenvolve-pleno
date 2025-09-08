@@ -131,10 +131,10 @@ export default function InfoFormModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <h2 className="text-2xl font-bold text-white">
             Enviar Informação
           </h2>
           <button
@@ -152,7 +152,7 @@ export default function InfoFormModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Informação */}
           <div>
-            <label htmlFor="informacao" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="informacao" className="block text-sm font-medium text-gray-300 mb-2">
               Informação sobre o desaparecido *
             </label>
             <textarea
@@ -161,8 +161,8 @@ export default function InfoFormModal({
               value={formData.informacao}
               onChange={handleInputChange}
               rows={4}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.informacao ? 'border-red-300' : 'border-gray-300'
+              className={`w-full px-3 py-2 bg-gray-700 border rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                errors.informacao ? 'border-red-500' : 'border-gray-600'
               }`}
               placeholder="Descreva onde e quando você viu a pessoa, como estava vestida, etc..."
               disabled={loading}
@@ -174,7 +174,7 @@ export default function InfoFormModal({
 
           {/* Data */}
           <div>
-            <label htmlFor="data" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="data" className="block text-sm font-medium text-gray-300 mb-2">
               Data da observação *
             </label>
             <input
@@ -183,9 +183,12 @@ export default function InfoFormModal({
               name="data"
               value={formData.data}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.data ? 'border-red-300' : 'border-gray-300'
+              className={`w-full px-3 py-2 bg-gray-700 border rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${
+                errors.data ? 'border-red-500' : 'border-gray-600'
               }`}
+              style={{
+                colorScheme: 'dark'
+              }}
               disabled={loading}
             />
             {errors.data && (
@@ -195,12 +198,12 @@ export default function InfoFormModal({
 
           {/* Upload de Arquivos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Anexos (opcional)
             </label>
             
             {/* Botão de Upload */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+            <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -214,7 +217,7 @@ export default function InfoFormModal({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-purple-600 hover:text-purple-800 font-medium"
               >
                 <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -229,16 +232,16 @@ export default function InfoFormModal({
             {/* Lista de Arquivos */}
             {formData.anexos.length > 0 && (
               <div className="mt-4 space-y-2">
-                <h4 className="text-sm font-medium text-gray-700">Arquivos selecionados:</h4>
+                <h4 className="text-sm font-medium text-gray-300">Arquivos selecionados:</h4>
                 {formData.anexos.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                  <div key={index} className="flex items-center justify-between bg-gray-700 p-3 rounded-md">
                     <div className="flex items-center">
                       <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                        <p className="text-sm font-medium text-white">{file.name}</p>
+                        <p className="text-xs text-gray-400">{formatFileSize(file.size)}</p>
                       </div>
                     </div>
                     <button
@@ -258,19 +261,19 @@ export default function InfoFormModal({
           </div>
 
           {/* Botões */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-700">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 flex items-center"
+              className="px-4 py-2 text-sm font-medium text-white bg-purple-800 border border-transparent rounded-md hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 flex items-center"
             >
               {loading ? (
                 <>

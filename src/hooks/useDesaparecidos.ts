@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { DesaparecidosService } from '../services/desaparecidosService';
-import { ApiResponse, FiltroParams, PessoaDesaparecida } from '../types/api';
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { buscarPessoasDesaparecidas, limparErro } from '../store/slices/desaparecidosSlice';
+import { atualizarFiltros, limparFiltros, resetarPagina } from '../store/slices/filtrosSlice';
+import { FiltroParams, PessoaDesaparecida, ApiResponse } from '../types/api';
 
 interface UseDesaparecidosReturn {
   data: ApiResponse | null;
@@ -12,57 +14,70 @@ interface UseDesaparecidosReturn {
   currentPage: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
-  buscarPessoas: (filtros?: FiltroParams) => Promise<void>;
+  filtros: FiltroParams;
+  buscarPessoas: (filtros?: FiltroParams) => void;
+  limparFiltrosEBuscar: () => void;
+  limparErroAtual: () => void;
 }
 
-export const useDesaparecidos = (filtrosIniciais?: FiltroParams): UseDesaparecidosReturn => {
-  const [data, setData] = useState<ApiResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [filtrosAtuais, setFiltrosAtuais] = useState<FiltroParams>({
-    pagina: 0,
-    porPagina: 12,
-    ...filtrosIniciais
-  });
+export const useDesaparecidos = (): UseDesaparecidosReturn => {
+  const dispatch = useAppDispatch();
+  const { data, loading, error, currentPage, totalPages, totalElements } = useAppSelector(
+    (state) => state.desaparecidos
+  );
+  const filtros = useAppSelector((state) => state.filtros);
 
-  const buscarPessoas = useCallback(async (filtros?: FiltroParams) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Se filtros são fornecidos, usa eles diretamente (substitui os atuais)
-      // Se não, usa os filtros atuais
-      const filtrosParaUsar = filtros !== undefined ? filtros : filtrosAtuais;
-      setFiltrosAtuais(filtrosParaUsar);
-      
-      console.log('🔍 Buscando com filtros:', filtrosParaUsar);
-      const response = await DesaparecidosService.buscarPessoasDesaparecidas(filtrosParaUsar);
-      setData(response);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
-      setError(errorMessage);
-      console.error('Erro ao buscar pessoas desaparecidas:', err);
-    } finally {
-      setLoading(false);
+  const buscarPessoas = (novosFiltros?: FiltroParams) => {
+    if (novosFiltros) {
+      // Se for uma nova busca (não paginação), resetar página para 0
+      const filtrosComPaginaResetada = {
+        ...novosFiltros,
+        pagina: 0
+      };
+      dispatch(atualizarFiltros(filtrosComPaginaResetada));
+      dispatch(buscarPessoasDesaparecidas(filtrosComPaginaResetada));
+    } else {
+      // Busca com filtros atuais, mas sempre resetar página para 0
+      const filtrosComPaginaResetada = {
+        ...filtros,
+        pagina: 0
+      };
+      dispatch(resetarPagina());
+      dispatch(buscarPessoasDesaparecidas(filtrosComPaginaResetada));
     }
-  }, [filtrosAtuais]);
+  };
 
+  const limparFiltrosEBuscar = () => {
+    dispatch(limparFiltros());
+    // Não executa busca automaticamente - usuário deve clicar em "Buscar"
+  };
 
-  // Carrega dados iniciais
+  const limparErroAtual = () => {
+    dispatch(limparErro());
+  };
+
+  // Remover carregamento automático - dados só serão carregados quando o usuário clicar em "Buscar"
+
+  // Buscar apenas quando a página mudar (para paginação)
   useEffect(() => {
-    buscarPessoas();
-  }, []);
+    if (filtros.pagina !== undefined && filtros.pagina !== currentPage && filtros.pagina > 0) {
+      dispatch(buscarPessoasDesaparecidas(filtros));
+    }
+  }, [dispatch, filtros.pagina, currentPage, filtros]);
 
   return {
     data,
     loading,
     error,
     pessoas: data?.content || [],
-    totalPages: data?.totalPages || 0,
-    totalElements: data?.totalElements || 0,
-    currentPage: data?.number || 0,
+    totalPages,
+    totalElements,
+    currentPage,
     hasNextPage: data ? !data.last : false,
     hasPreviousPage: data ? !data.first : false,
+    filtros,
     buscarPessoas,
+    limparFiltrosEBuscar,
+    limparErroAtual,
   };
 };

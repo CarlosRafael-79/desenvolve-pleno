@@ -6,7 +6,7 @@ const createAxiosInstance = (): AxiosInstance => {
     baseURL: 'https://abitus-api.geia.vip/v1',
     timeout: 10000,
     headers: {
-      'Content-Type': 'application/json',
+      'Accept': '*/*',
     },
   });
 
@@ -16,6 +16,13 @@ const createAxiosInstance = (): AxiosInstance => {
       console.log(`🚀 Making request to: ${config.method?.toUpperCase()} ${config.url}`);
       console.log(`🚀 Base URL: ${config.baseURL}`);
       console.log(`🚀 Full URL: ${config.baseURL}${config.url}`);
+      
+      // Se for FormData, remover Content-Type para que o axios defina automaticamente
+      if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+        console.log(`🚀 FormData detected, Content-Type will be set automatically`);
+      }
+      
       return config;
     },
     (error) => {
